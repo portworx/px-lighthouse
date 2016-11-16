@@ -16,11 +16,8 @@ services :
       - consul-px
     links :
       - influx-px
-      - etcd-px
+      - consul-px
     environment :
-      - PWX_INFLUXDB="http://influx-px:8086"
-      - PWX_INFLUXUSR="admin"
-      - PWX_INFLUXPW="password"
       - PWX_HOSTNAME=${LOCAL_IP}
     entrypoint :
       - /bin/bash
