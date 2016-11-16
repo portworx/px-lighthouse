@@ -13,7 +13,7 @@ services :
       - "80:80"
     depends_on : 
       - influx-px
-      - etcd-px
+      - consul-px
     links :
       - influx-px
       - etcd-px
@@ -26,7 +26,7 @@ services :
       - /bin/bash
       - /lighthouse/on-prem-entrypoint.sh
       - -k
-      - etcd:http://${LOCAL_IP}:2379
+      - consul:http://${LOCAL_IP}:2379
       - -d
       - http://${PWX_INFLUXUSR}:${PWX_INFLUXPW}@${LOCAL_IP}:8086
 
@@ -44,32 +44,13 @@ services :
       - INFLUXDB_INIT_PWD="password" 
       - PRE_CREATE_DB="px_stats"
 
-  etcd-px :
-    image : quay.io/coreos/etcd:v2.3.7
+  consul-px :
+    image : consul
     restart : always
-    container_name : etcd-px
+    container_name : consul-px
     network_mode : "bridge"
     ports :
-      - "4001:4001"
-      - "2379:2379"
-      - "2380:2380"
-    entrypoint :
-      - /etcd
-      - -name 
-      - etcd0
-      - -data-dir
-      - /var/lib/etcd/
-      - -advertise-client-urls
-      - "http://${LOCAL_IP}:2379,http://${LOCAL_IP}:4001"
-      - -listen-client-urls 
-      - "http://0.0.0.0:2379"
-      - -initial-advertise-peer-urls
-      - "http://${LOCAL_IP}:2380"
-      - -listen-peer-urls
-      - "http://0.0.0.0:2380"
-      - -initial-cluster-token
-      - etcd-cluster
-      - -initial-cluster
-      - "etcd0=http://${LOCAL_IP}:2380"
-      - -initial-cluster-state
-      - new
+      - "8300:8300"
+      - "8500:8500"
+    volumes :
+      - /tmp/consul:/consul/data
