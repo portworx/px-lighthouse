@@ -26,7 +26,7 @@ services :
       - /bin/bash
       - /lighthouse/on-prem-entrypoint.sh
       - -k
-      - consul:http://${LOCAL_IP}:2379
+      - consul:http://${LOCAL_IP}:8500
       - -d
       - http://${PWX_INFLUXUSR}:${PWX_INFLUXPW}@${LOCAL_IP}:8086
 
