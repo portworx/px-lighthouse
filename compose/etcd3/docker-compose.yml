@@ -56,22 +56,22 @@ services :
     environment :
       - ETCDCTL_API=3
     entrypoint :
-      - /usr/loacl/bin/etcd
-      - -name 
+      - /usr/local/bin/etcd
+      - --name 
       - etcd0
-      - -data-dir
+      - --data-dir
       - /var/lib/etcd/
-      - -advertise-client-urls
+      - --advertise-client-urls
       - "http://${LOCAL_IP}:2379,http://${LOCAL_IP}:4001"
-      - -listen-client-urls 
+      - --listen-client-urls 
       - "http://0.0.0.0:2379"
-      - -initial-advertise-peer-urls
+      - --initial-advertise-peer-urls
       - "http://${LOCAL_IP}:2380"
-      - -listen-peer-urls
+      - --listen-peer-urls
       - "http://0.0.0.0:2380"
-      - -initial-cluster-token
+      - --initial-cluster-token
       - etcd-cluster
-      - -initial-cluster
+      - --initial-cluster
       - "etcd0=http://${LOCAL_IP}:2380"
-      - -initial-cluster-state
+      - --initial-cluster-state
       - new
