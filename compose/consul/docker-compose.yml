@@ -1,0 +1,75 @@
+# export LOCAL_IP=$(ifconfig | grep -E 'inet |broadcast' | grep -Ev 'broadcast 0|127' | awk '{print $2}' | head -1)
+version : '2'
+services :
+
+  px-lighthouse :
+    image : portworx/px-lighthouse
+    restart : always
+    container_name : px-lighthouse
+    network_mode : "bridge"
+    volumes :
+      - /var/log:/var/log
+    ports :
+      - "80:80"
+    depends_on : 
+      - influx-px
+      - etcd-px
+    links :
+      - influx-px
+      - etcd-px
+    environment :
+      - PWX_INFLUXDB="http://influx-px:8086"
+      - PWX_INFLUXUSR="admin"
+      - PWX_INFLUXPW="password"
+      - PWX_HOSTNAME=${LOCAL_IP}
+    entrypoint :
+      - /bin/bash
+      - /lighthouse/on-prem-entrypoint.sh
+      - -k
+      - etcd:http://${LOCAL_IP}:2379
+      - -d
+      - http://${PWX_INFLUXUSR}:${PWX_INFLUXPW}@${LOCAL_IP}:8086
+
+  influx-px :
+    image : tutum/influxdb
+    restart : always
+    container_name : influx-px
+    network_mode : "bridge"
+    ports :
+      - "8083:8083"
+      - "8086:8086"
+    environment :
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+      - ADMIN_USER="admin" 
+      - INFLUXDB_INIT_PWD="password" 
+      - PRE_CREATE_DB="px_stats"
+
+  etcd-px :
+    image : quay.io/coreos/etcd:v2.3.7
+    restart : always
+    container_name : etcd-px
+    network_mode : "bridge"
+    ports :
+      - "4001:4001"
+      - "2379:2379"
+      - "2380:2380"
+    entrypoint :
+      - /etcd
+      - -name 
+      - etcd0
+      - -data-dir
+      - /var/lib/etcd/
+      - -advertise-client-urls
+      - "http://${LOCAL_IP}:2379,http://${LOCAL_IP}:4001"
+      - -listen-client-urls 
+      - "http://0.0.0.0:2379"
+      - -initial-advertise-peer-urls
+      - "http://${LOCAL_IP}:2380"
+      - -listen-peer-urls
+      - "http://0.0.0.0:2380"
+      - -initial-cluster-token
+      - etcd-cluster
+      - -initial-cluster
+      - "etcd0=http://${LOCAL_IP}:2380"
+      - -initial-cluster-state
+      - new
