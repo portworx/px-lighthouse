@@ -52,5 +52,7 @@ services :
     ports :
       - "8300:8300"
       - "8500:8500"
-    volumes :
-      - /tmp/consul:/consul/data
+    environment :
+      - CONSUL_LOCAL_CONFIG={"bootstrap_expect":1,"data_dir":"/var/lib/consul","server":true}
+    
+    command: "agent -server -bind=127.0.0.1 -client=0.0.0.0"
