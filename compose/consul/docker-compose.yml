@@ -35,6 +35,8 @@ services :
     restart : always
     container_name : influx-px
     network_mode : "bridge"
+    volumes :
+      - /var/lib/influxdb:/data
     ports :
       - "8083:8083"
       - "8086:8086"
